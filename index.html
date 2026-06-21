@@ -6,108 +6,385 @@
 <title>Coffee</title>
 <link rel="icon" type="image/png" href="coffeeicon.png" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
   body {
     font-family: 'Inter', system-ui, sans-serif;
     background: #0f0f0f;
     min-height: 100vh;
+    color: #fff;
+    overflow-x: hidden;
+  }
+
+  /* ── PAGE SYSTEM ── */
+  .page {
+    position: fixed;
+    inset: 0;
+    min-height: 100vh;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #fff;
-  }
-  .page {
-    display: flex;
     flex-direction: column;
-    align-items: center;
     text-align: center;
-    padding: 2rem 1rem;
+    padding: 2rem 1.5rem;
+    pointer-events: none;
+    opacity: 0;
+    transform: translateY(18px);
+    transition: opacity 0.35s cubic-bezier(0.4,0,0.2,1), transform 0.35s cubic-bezier(0.4,0,0.2,1);
+    will-change: transform, opacity;
   }
+  .page.active {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: all;
+    position: relative;
+  }
+  .page.exit {
+    opacity: 0;
+    transform: translateY(-14px);
+    pointer-events: none;
+    position: fixed;
+  }
+
+  /* ── HOME PAGE ── */
   .mascot {
-    width: 90px;
-    height: 90px;
+    width: 150px;
+    height: 150px;
     object-fit: contain;
-    margin-bottom: 14px;
-    filter: drop-shadow(0 8px 20px rgba(0,0,0,0.5));
+    margin-bottom: 24px;
+    filter: drop-shadow(0 12px 32px rgba(0,0,0,0.6));
     transition: transform 0.3s ease;
   }
-  .mascot:hover { transform: translateY(-4px) scale(1.04); }
+  .mascot:hover { transform: translateY(-6px) scale(1.05); }
+
   .btn-row {
     display: flex;
     align-items: center;
     gap: 8px;
-    margin-bottom: 10px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+    justify-content: center;
   }
-  .btn-download {
-    display: inline-flex;
-    align-items: center;
-    gap: 7px;
-    padding: 10px 18px;
-    font-size: 13.5px;
-    font-weight: 500;
-    font-family: inherit;
-    color: rgba(255,255,255,0.8);
-    background: rgba(255,255,255,0.07);
-    border: 1px solid rgba(255,255,255,0.13);
-    border-radius: 999px;
-    cursor: pointer;
-    transition: background 0.15s, color 0.15s;
-    white-space: nowrap;
-  }
-  .btn-download:hover { background: rgba(255,255,255,0.12); color: #fff; }
-  .btn-download:active { opacity: 0.75; }
-  .icon-group {
-    display: inline-flex;
-    align-items: center;
-    background: rgba(255,255,255,0.07);
-    border: 1px solid rgba(255,255,255,0.13);
-    border-radius: 999px;
-    overflow: hidden;
-  }
-  .icon-btn {
-    width: 38px;
-    height: 38px;
+
+  /* Shared base */
+  .btn, .icon-btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    color: rgba(255,255,255,0.7);
-    background: transparent;
-    border: none;
+    font-family: inherit;
+    font-size: 13.5px;
+    font-weight: 600;
+    border-radius: 10px;
     cursor: pointer;
+    border: 1px solid rgba(255,255,255,0.13);
     text-decoration: none;
-    transition: background 0.15s, color 0.15s;
-    border-radius: 50%;
+    white-space: nowrap;
+    transition: background 0.2s, color 0.2s, transform 0.1s;
   }
-  .icon-btn:hover { background: rgba(255,255,255,0.1); color: #fff; }
+  .btn:active, .icon-btn:active { transform: scale(0.95); }
+
+  /* Download */
+  .btn-download {
+    gap: 7px;
+    padding: 10px 20px;
+    color: rgba(255,255,255,0.8);
+    background: rgba(255,255,255,0.07);
+    border-color: rgba(255,255,255,0.13);
+    height: 42px;
+  }
+  .btn-download:hover { background: rgba(255,255,255,0.13); color: #fff; }
+
+  /* ── EXPANDING ICON BUTTONS ── */
+  .icon-btn {
+    height: 42px;
+    width: 42px;
+    overflow: hidden;
+    color: rgba(255,255,255,0.65);
+    background: rgba(255,255,255,0.07);
+    flex-shrink: 0;
+    justify-content: flex-start;
+    transition: background 0.22s, color 0.22s, width 0.3s cubic-bezier(0.4,0,0.2,1), transform 0.1s;
+  }
+  .icon-btn:hover {
+    background: rgba(255,255,255,0.13);
+    color: #fff;
+  }
+  .icon-btn[data-label="How to use"]:hover     { width: 122px; }
+  .icon-btn[data-label="Documentation"]:hover  { width: 148px; }
+  .icon-btn[data-label="Discord"]:hover         { width: 100px; }
+  .icon-btn[data-label="Videos"]:hover          { width: 96px; }
+
+  .icon-btn .icon-inner {
+    width: 42px;
+    height: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .icon-btn .btn-label {
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
+    opacity: 0;
+    transform: translateX(-6px);
+    transition: opacity 0.2s, transform 0.25s cubic-bezier(0.4,0,0.2,1);
+    padding-right: 14px;
+  }
+  .icon-btn:hover .btn-label {
+    opacity: 1;
+    transform: translateX(0);
+  }
+
+  .icon-btn svg { flex-shrink: 0; }
+
   .tagline {
     font-size: 12.5px;
     color: rgba(255,255,255,0.32);
   }
+
+  /* ── INNER PAGES ── */
+  .inner-scroll {
+    overflow-y: auto;
+    max-height: 100vh;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    padding: 3rem 1.5rem;
+  }
+
+  .docs-wrap {
+    max-width: 680px;
+    width: 100%;
+    text-align: left;
+  }
+
+  .docs-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    color: rgba(255,255,255,0.45);
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+    margin-bottom: 40px;
+    padding: 0;
+    transition: color 0.15s;
+  }
+  .docs-back:hover { color: #fff; }
+
+  .docs-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 48px;
+  }
+  .docs-header img { width: 44px; height: 44px; object-fit: contain; }
+  .docs-header h1 { font-size: 28px; font-weight: 700; letter-spacing: -0.5px; }
+  .docs-header span {
+    font-size: 12px;
+    font-weight: 500;
+    color: #c8a07a;
+    background: rgba(26,16,8,0.6);
+    border: 1px solid rgba(90,46,20,0.5);
+    border-radius: 6px;
+    padding: 2px 8px;
+    margin-left: 6px;
+    vertical-align: middle;
+  }
+
+  .docs-section { margin-bottom: 40px; }
+  .docs-section h2 {
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #c8a07a;
+    margin-bottom: 16px;
+  }
+  .docs-section p {
+    font-size: 14.5px;
+    line-height: 1.75;
+    color: rgba(255,255,255,0.65);
+    margin-bottom: 12px;
+  }
+
+  .docs-card {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 12px;
+    padding: 20px 24px;
+    margin-bottom: 10px;
+  }
+  .docs-card h3 { font-size: 14px; font-weight: 600; margin-bottom: 6px; }
+  .docs-card p { font-size: 13.5px; color: rgba(255,255,255,0.5); line-height: 1.6; margin: 0; }
+
+  .docs-divider {
+    border: none;
+    border-top: 1px solid rgba(255,255,255,0.07);
+    margin: 40px 0;
+  }
 </style>
 </head>
 <body>
-<div class="page">
-  <img class="mascot" src="coffeeicon.png" alt="Coffee Icon" />
+
+<!-- ══ HOME ══ -->
+<div class="page active" id="page-home">
+  <img class="mascot" src="coffeeicon.png" alt="Coffee" />
+
   <div class="btn-row">
-    <button class="btn-download">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+    <button class="btn btn-download">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
       Download
     </button>
-    <div class="icon-group">
-      <a href="https://discord.gg" class="icon-btn" aria-label="Discord">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057c.003.028.015.057.03.07a19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg>
-      </a>
-      <a href="https://youtube.com" class="icon-btn" aria-label="YouTube">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
-      </a>
-      <a href="#" class="icon-btn" aria-label="Script hub">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
-      </a>
-    </div>
+
+    <button class="icon-btn" data-label="How to use" onclick="navigate('howto')" aria-label="How to use">
+      <span class="icon-inner"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></span>
+      <span class="btn-label">How to use</span>
+    </button>
+
+    <button class="icon-btn" data-label="Documentation" onclick="navigate('docs')" aria-label="Documentation">
+      <span class="icon-inner"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></span>
+      <span class="btn-label">Documentation</span>
+    </button>
+
+    <a href="https://discord.gg" class="icon-btn" data-label="Discord" aria-label="Discord">
+      <span class="icon-inner"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057c.003.028.015.057.03.07a19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg></span>
+      <span class="btn-label">Discord</span>
+    </a>
+
+    <button class="icon-btn" data-label="Videos" onclick="navigate('videos')" aria-label="Videos">
+      <span class="icon-inner"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></span>
+      <span class="btn-label">Videos</span>
+    </button>
   </div>
+
   <p class="tagline">Coffee is completely free and keyless.</p>
 </div>
+
+<!-- ══ HOW TO USE ══ -->
+<div class="page" id="page-howto">
+  <div class="inner-scroll">
+    <div class="docs-wrap">
+      <button class="docs-back" onclick="navigate('home')">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        Back
+      </button>
+      <div class="docs-header">
+        <img src="coffeeicon.png" alt="Coffee" />
+        <h1>How to Use</h1>
+      </div>
+      <div class="docs-section">
+        <h2>Quick Start</h2>
+        <p>Getting Coffee running takes about 30 seconds. No setup, no keys.</p>
+        <div class="docs-card"><h3>Step 1 — Download</h3><p>Hit the Download button on the home page. You'll get a single zipped file.</p></div>
+        <div class="docs-card"><h3>Step 2 — Extract all</h3><p>Right click the file, and extract all.</p></div>
+        <div class="docs-card"><h3>Step 3 — Run Coffee</h3><p>That is all you have to do, and you have Coffee!</p></div>
+      </div>
+      <hr class="docs-divider" />
+      <div class="docs-section">
+        <h2>Any issues?</h2>
+        <div class="docs-card"><h3>What version are you on?</h3><p>Check the Discord to make sure you're on the newest version!</p></div>
+        <div class="docs-card"><h3>Something not working?</h3><p>Message a helper or make a ticket if nothing is working.</p></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ DOCUMENTATION ══ -->
+<div class="page" id="page-docs">
+  <div class="inner-scroll">
+    <div class="docs-wrap">
+      <button class="docs-back" onclick="navigate('home')">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        Back
+      </button>
+      <div class="docs-header">
+        <img src="coffeeicon.png" alt="Coffee" />
+        <div><h1>Documentation</h1></div>
+      </div>
+      <div class="docs-section">
+        <h2>Overview</h2>
+        <p>Coffee is a free, keyless lua executor. Built and designed for Roblox developers.</p>
+      </div>
+      <hr class="docs-divider" />
+      <div class="docs-section">
+        <h2>FAQ</h2>
+        <div class="docs-card"><h3>Is Coffee really free?</h3><p>Coffee is completely free and keyless, as of 6/20/26.</p></div>
+        <div class="docs-card"><h3>Is it safe to use?</h3><p>Coffee is completely safe, however it might get flagged, because it is a Roblox tool which alters the users memory.</p></div>
+        <div class="docs-card"><h3>Where do I report bugs?</h3><p>You can report any bugs in the discord server. Join it on the home page.</p></div>
+        <div class="docs-card"><h3>Is Coffee released?</h3><p>No. Coffee is in development with 3 active developers.</p></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ VIDEOS ══ -->
+<div class="page" id="page-videos">
+  <div class="inner-scroll">
+    <div class="docs-wrap" style="max-width:780px;">
+      <button class="docs-back" onclick="navigate('home')">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        Back
+      </button>
+      <div class="docs-header">
+        <img src="coffeeicon.png" alt="Coffee" />
+        <h1>Videos</h1>
+      </div>
+      <p style="color:rgba(255,255,255,0.45);font-size:13px;margin-bottom:32px;margin-top:-32px;">Tutorials and updates from the Coffee YouTube channel.</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+        <div style="border-radius:12px;overflow:hidden;aspect-ratio:16/9;background:#1a1a1a;border:1px solid rgba(255,255,255,0.08);">
+          <iframe width="100%" height="100%" src="https://www.youtube.com/embed/dQw4w9WgXcQ" title="Video 1" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="display:block;"></iframe>
+        </div>
+        <div style="border-radius:12px;overflow:hidden;aspect-ratio:16/9;background:#1a1a1a;border:1px solid rgba(255,255,255,0.08);">
+          <iframe width="100%" height="100%" src="https://www.youtube.com/embed/dQw4w9WgXcQ" title="Video 2" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="display:block;"></iframe>
+        </div>
+        <div style="border-radius:12px;overflow:hidden;aspect-ratio:16/9;background:#1a1a1a;border:1px solid rgba(255,255,255,0.08);">
+          <iframe width="100%" height="100%" src="https://www.youtube.com/embed/dQw4w9WgXcQ" title="Video 3" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="display:block;"></iframe>
+        </div>
+        <div style="border-radius:12px;overflow:hidden;aspect-ratio:16/9;background:#1a1a1a;border:1px solid rgba(255,255,255,0.08);">
+          <iframe width="100%" height="100%" src="https://www.youtube.com/embed/dQw4w9WgXcQ" title="Video 4" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="display:block;"></iframe>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const routes = { home: '/', howto: '/how-to-use', docs: '/documentation', videos: '/videos' };
+
+  function navigate(pageId) {
+    const current = document.querySelector('.page.active');
+    const next = document.getElementById('page-' + pageId);
+    if (!next || current === next) return;
+
+    current.classList.add('exit');
+    current.classList.remove('active');
+
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        next.classList.add('active');
+        window.scrollTo(0, 0);
+      });
+    });
+
+    current.addEventListener('transitionend', () => {
+      current.classList.remove('exit');
+    }, { once: true });
+
+    history.pushState({ page: pageId }, '', routes[pageId] || '/');
+  }
+
+  window.addEventListener('popstate', e => {
+    const page = e.state?.page || 'home';
+    navigate(page);
+  });
+</script>
 </body>
 </html>
